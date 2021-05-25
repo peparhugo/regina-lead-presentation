@@ -222,7 +222,7 @@ class ReginaGISData:
         self.joined_school_data = self.joined_school_data[
             self.joined_school_data.NAME.isna()==False
         ][
-            ['geometry','NAME','ADDRESS']
+            ['geometry', 'NAME', 'ADDRESS']
         ]
 
     def get_data(self):
