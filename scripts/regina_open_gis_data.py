@@ -96,23 +96,56 @@ class ReginaGISData:
         This method merges the snapshot connector data and current data to see what has been replaced overtime.
         :return:
         '''
+        # merge snapshot and current
         merged = self.attributes.merge(self.old_attributes[['MATERIAL', 'GISID', 'UPDATE_DATE']], on='GISID')
-        target_data = merged[((merged.MATERIAL_x != merged.MATERIAL_y) & (merged.MATERIAL_y == 'Pb')) |
-                             ((merged.MATERIAL_x == 'Pb') & (merged.UPDATE_DATE_x != merged.UPDATE_DATE_y))]
+
+        # find target data that has been replaced
+        target_data = merged[
+            ((merged.MATERIAL_x != merged.MATERIAL_y) & (merged.MATERIAL_y == 'Pb')) |
+            ((merged.MATERIAL_x == 'Pb') & (merged.UPDATE_DATE_x != merged.UPDATE_DATE_y))
+        ]
+
         target_data['replace_month'] = target_data.UPDATE_DATE_x.apply(pd.to_datetime, unit='ms').dt.to_period('M')
+
+        #find what needs to be replaced
         to_replace = self.attributes[
-            (self.attributes.MATERIAL == 'Pb') & (self.attributes.STATUS == 'ACTIVE') & (self.attributes.UPDATE_DATE == 1253836800000)]
-        self.geo_data = gpd.GeoDataFrame(pd.DataFrame(
-            [i['attributes'] for i in self.resp_data if i['attributes']['GISID'] in to_replace.GISID.to_list()]),
-                                    geometry=[shapely.geometry.LineString(i['geometry']['paths'][0]) for i in self.resp_data
-                                              if i['attributes']['GISID'] in to_replace.GISID.to_list()])
-        self.geo_data_replaced = gpd.GeoDataFrame(pd.DataFrame(
-            [i['attributes'] for i in self.resp_data if i['attributes']['GISID'] in target_data.GISID.to_list()]),
-                                             geometry=[shapely.geometry.LineString(i['geometry']['paths'][0]) for i in
-                                                       self.resp_data if
-                                                       i['attributes']['GISID'] in target_data.GISID.to_list()])
-        self.geo_data_replaced['replace_month'] = self.geo_data_replaced.UPDATE_DATE.apply(pd.to_datetime,
-                                                                                 unit='ms').dt.to_period('M')
+            (self.attributes.MATERIAL == 'Pb') & (self.attributes.STATUS == 'ACTIVE') & (self.attributes.UPDATE_DATE == 1253836800000)
+        ]
+        # create dataframes
+        self.geo_data = gpd.GeoDataFrame(
+            pd.DataFrame(
+                [
+                    i['attributes']
+                    for i in self.resp_data
+                    if i['attributes']['GISID'] in to_replace.GISID.to_list()
+                ]
+            ),
+            geometry=[
+                shapely.geometry.LineString(i['geometry']['paths'][0])
+                for i in self.resp_data
+                if i['attributes']['GISID'] in to_replace.GISID.to_list()
+            ]
+        )
+        self.geo_data_replaced = gpd.GeoDataFrame(
+            pd.DataFrame(
+                [
+                    i['attributes']
+                    for i in self.resp_data
+                    if i['attributes']['GISID'] in target_data.GISID.to_list()
+                ]
+            ),
+            geometry=[
+                shapely.geometry.LineString(i['geometry']['paths'][0])
+                for i in self.resp_data
+                if i['attributes']['GISID'] in target_data.GISID.to_list()
+            ]
+        )
+        self.geo_data_replaced['replace_month'] = self.geo_data_replaced.UPDATE_DATE.apply(
+            pd.to_datetime,
+            unit='ms'
+        ).dt.to_period('M')
+
+        # format geo dataframes
         self.geo_data.crs = {'init': 'epsg:4326'}
         self.geo_data_replaced.crs = {'init': 'epsg:4326'}
         self.geo_data['lon'] = self.geo_data.centroid.x
@@ -172,12 +205,25 @@ class ReginaGISData:
             )
         )
         school_df = pd.DataFrame(schools.json()['features'])
-        school_geo_df = gpd.GeoDataFrame(school_df.attributes.tolist(), geometry=school_df.geometry.map(
-            lambda x: shapely.geometry.Point(x['x'], x['y'])))
+        school_geo_df = gpd.GeoDataFrame(
+            school_df.attributes.tolist(),
+            geometry=school_df.geometry.map(
+                lambda x: shapely.geometry.Point(x['x'], x['y'])
+            )
+        )
         school_geo_df.crs = {'init': 'epsg:4326'}
-        school_geo_df = school_geo_df[['NAME', 'ADDRESS', 'geometry']].dissolve(by=['NAME', 'ADDRESS']).reset_index()
-        self.joined_school_data = gpd.sjoin(self.addresses, school_geo_df, how="left", op='contains')
-        self.joined_school_data = self.joined_school_data[self.joined_school_data.NAME.isna()==False][['geometry','NAME','ADDRESS']]
+        school_geo_df = school_geo_df[
+            ['NAME', 'ADDRESS', 'geometry']
+        ].dissolve(by=['NAME', 'ADDRESS']).reset_index()
+
+        self.joined_school_data = gpd.sjoin(
+            self.addresses, school_geo_df, how="left", op='contains'
+        )
+        self.joined_school_data = self.joined_school_data[
+            self.joined_school_data.NAME.isna()==False
+        ][
+            ['geometry','NAME','ADDRESS']
+        ]
 
     def get_data(self):
         self.get_connection_snapshot_data()
