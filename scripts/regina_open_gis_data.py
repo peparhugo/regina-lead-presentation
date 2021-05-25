@@ -97,8 +97,8 @@ class ReginaGISData:
         if not os.path.isdir('../data/shp.AddressParcels'):
             r = requests.get('https://ckanprodstorage.blob.core.windows.net/opendata/Address/SHP_ZIP/shp.AddressParcels.zip')
             z = zipfile.ZipFile(io.BytesIO(r.content))
-            z.extractall("./shp.AddressParcels")
-        self.addresses = gpd.read_file('../../Downloads/shp.AddressParcels/AddressParcels.shp')
+            z.extractall("../data/shp.AddressParcels")
+        self.addresses = gpd.read_file("../data/shp.AddressParcels")
         self.addresses.crs = {'init': 'epsg:26913'}
         self.addresses.to_crs(epsg=4326, inplace=True)
         self.addresses.crs = {'init': 'epsg:4326'}
