@@ -6,16 +6,6 @@ import geopandas as gpd
 import numpy as np
 from keplergl import KeplerGl
 
-# get data
-stats_can_data = StatsCanData()
-stats_can_data.get_stats_can_data()
-
-regina_data = ReginaGISData()
-regina_data.get_data()
-
-day_care = SaskatchewanDayCare()
-day_care.get_day_cares(regina_data.addresses)
-
 # custom income mapping by geo id
 mapping_income_data = pd.DataFrame(
     [
@@ -36,6 +26,17 @@ mapping_income_data = pd.DataFrame(
     ],
     columns=['GEO_UID', 'After Tax Income Range']
 )
+
+# get data
+stats_can_data = StatsCanData()
+stats_can_data.get_stats_can_data(mapping_income_data.GEO_UID.tolist())
+
+regina_data = ReginaGISData()
+regina_data.get_data()
+
+day_care = SaskatchewanDayCare()
+day_care.get_day_cares(regina_data.addresses)
+
 # set the metrics to pull from stats can
 dims = stats_can_data.census_tracts_stats[
     stats_can_data.census_tracts_stats.HIER_ID.str.strip().isin(
@@ -122,8 +123,8 @@ pb_census_count_df = pb_census_count_df.drop(
 pb_census_count_df[
     '% Replaced Since Dec 2019'
 ] = np.round(
-    100 * pb_census_count_df['GLOBALID'] / np.sum(
-        pb_census_count_df['GLOBALID'],
+    100 * pb_census_count_df['GLOBALID'] / (
+        pb_census_count_df['GLOBALID'] + \
         pb_census_count_df['Lead Infrastructure Count']
     ),
     1
@@ -140,9 +141,9 @@ pb_census_count_df[
 
 pb_census_count_df[
     'Averge Low Income Individual per Dwelling'
-] = np.sum(
-    pb_census_count_df['Low Income - 0 to 17 years old'],
-    pb_census_count_df['Low Income - 18 to 64 years old'],
+] = (
+    pb_census_count_df['Low Income - 0 to 17 years old'] + \
+    pb_census_count_df['Low Income - 18 to 64 years old'] + \
     pb_census_count_df['Low Income - 65 years old and over ']
 ) / pb_census_count_df['Total private dwellings']
 
