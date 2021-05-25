@@ -12,17 +12,37 @@ class ReginaGISData:
     def get_connection_current_data(self):
         i = 0
         lead_survey = requests.get(
-            'https://opengis.regina.ca/arcgis/rest/services/CGISViewer/DomesticWaterNetworkTrace/MapServer/4/query?f=json&where=(1%3D1)&returnGeometry=True&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=OBJECTID%20ASC&outSR=4326&resultOffset={}&resultRecordCount=10000'.format(
-                i)
-
+            'https://opengis.regina.ca/arcgis/rest/services/CGISViewer/DomesticWaterNetworkTrace/MapServer/4/query',
+            params=dict(
+                f='json',
+                where='(1=1)',
+                returnGeometry=True,
+                spatialRel='esriSpatialRelIntersects',
+                outFields='*',
+                orderByFields='OBJECTID ASC',
+                outSR=4326,
+                resultOffset=i,
+                resultRecordCount=10000
+            )
         )
         self.resp_data = lead_survey.json()['features']
         print(i)
         while len(lead_survey.json()['features']) != 0:
             i += len(lead_survey.json()['features'])
             lead_survey = requests.get(
-                'https://opengis.regina.ca/arcgis/rest/services/CGISViewer/DomesticWaterNetworkTrace/MapServer/4/query?f=json&where=(1%3D1)&returnGeometry=True&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=OBJECTID%20ASC&outSR=4326&resultOffset={}&resultRecordCount=10000'.format(
-                    i))
+                'https://opengis.regina.ca/arcgis/rest/services/CGISViewer/DomesticWaterNetworkTrace/MapServer/4/query',
+                params=dict(
+                    f='json',
+                    where='(1=1)',
+                    returnGeometry=True,
+                    spatialRel='esriSpatialRelIntersects',
+                    outFields='*',
+                    orderByFields='OBJECTID ASC',
+                    outSR=4326,
+                    resultOffset=i,
+                    resultRecordCount=10000
+                )
+            )
             self.resp_data.extend(lead_survey.json()['features'])
             print(i)
         self.attributes = pd.DataFrame([i['attributes'] for i in self.resp_data])
@@ -35,15 +55,37 @@ class ReginaGISData:
         '''
         i = 0
         lead_survey = requests.get(
-            'https://opengis.regina.ca/arcgis/rest/services/Collector/CBMH_Survey_Map/MapServer/12/query?f=json&where=(1%3D1)&returnGeometry=True&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=OBJECTID%20ASC&outSR=4326&resultOffset={}&resultRecordCount=10000'.format(
-                i))
+            'https://opengis.regina.ca/arcgis/rest/services/Collector/CBMH_Survey_Map/MapServer/12/query',
+            params=dict(
+                f='json',
+                where='(1=1)',
+                returnGeometry=True,
+                spatialRel='esriSpatialRelIntersects',
+                outFields='*',
+                orderByFields='OBJECTID ASC',
+                outSR=4326,
+                resultOffset=i,
+                resultRecordCount=10000
+            )
+        )
         old_resp_data = lead_survey.json()['features']
         print(i)
         while len(lead_survey.json()['features']) != 0:
             i += len(lead_survey.json()['features'])
             lead_survey = requests.get(
-                'https://opengis.regina.ca/arcgis/rest/services/Collector/CBMH_Survey_Map/MapServer/12/query?f=json&where=(1%3D1)&returnGeometry=True&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=OBJECTID%20ASC&outSR=4326&resultOffset={}&resultRecordCount=10000'.format(
-                    i))
+                'https://opengis.regina.ca/arcgis/rest/services/Collector/CBMH_Survey_Map/MapServer/12/query?',
+                params=dict(
+                    f='json',
+                    where='(1=1)',
+                    returnGeometry=True,
+                    spatialRel='esriSpatialRelIntersects',
+                    outFields='*',
+                    orderByFields='OBJECTID ASC',
+                    outSR=4326,
+                    resultOffset=i,
+                    resultRecordCount=10000
+                )
+            )
             old_resp_data.extend(lead_survey.json()['features'])
             print(i)
 
@@ -80,8 +122,19 @@ class ReginaGISData:
 
     def get_subdivision_data(self):
         resp_subdivision = requests.get(
-            'https://opengis.regina.ca/arcgis/rest/services/OpenData/Subdivisions/MapServer/5/query?f=json&where=(1%3D1)&returnGeometry=True&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=OBJECTID%20ASC&outSR=4326&resultOffset=0&resultRecordCount=10000').json()[
-            'features']
+            'https://opengis.regina.ca/arcgis/rest/services/OpenData/Subdivisions/MapServer/5/query',
+            params=dict(
+                f='json',
+                where='(1=1)',
+                returnGeometry=True,
+                spatialRel='esriSpatialRelIntersects',
+                outFields='*',
+                orderByFields='OBJECTID ASC',
+                outSR=4326,
+                resultOffset=0,
+                resultRecordCount=10000
+            )
+        ).json()['features']
         sub_attributes = pd.DataFrame([i['attributes'] for i in resp_subdivision])
         self.sub_geo_data = gpd.GeoDataFrame(sub_attributes,
                                         geometry=[shapely.geometry.Polygon(i['geometry']['rings'][0]) for i in
@@ -105,7 +158,19 @@ class ReginaGISData:
 
     def get_schools(self):
         schools = requests.get(
-            'https://opengis.regina.ca/arcgis/rest/services/OpenData/Schools/MapServer/0/query?f=json&where=(1%3D1)&returnGeometry=True&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=OBJECTID%20ASC&outSR=4326&resultOffset=0&resultRecordCount=10000')
+            'https://opengis.regina.ca/arcgis/rest/services/OpenData/Schools/MapServer/0/query',
+            params=dict(
+                f='json',
+                where='(1=1)',
+                returnGeometry=True,
+                spatialRel='esriSpatialRelIntersects',
+                outFields='*',
+                orderByFields='OBJECTID ASC',
+                outSR=4326,
+                resultOffset=0,
+                resultRecordCount=10000
+            )
+        )
         school_df = pd.DataFrame(schools.json()['features'])
         school_geo_df = gpd.GeoDataFrame(school_df.attributes.tolist(), geometry=school_df.geometry.map(
             lambda x: shapely.geometry.Point(x['x'], x['y'])))
@@ -116,9 +181,16 @@ class ReginaGISData:
 
     def get_data(self):
         self.get_connection_snapshot_data()
+        print('Got snapshot lead connectors')
         self.get_connection_current_data()
+        print('Got current lead connectors')
         self.merge_connection_current_snapshot_comparisons()
+        print('Merged snapshot and current data with diff summary')
         self.get_subdivision_data()
+        print('Got subdivision data')
         self.merge_connection_subdivision_data()
+        print('Merged subdivision data into lead data')
         self.get_address_data()
+        print('Got address parcels for Regina')
         self.get_schools()
+        print('Got school data')
