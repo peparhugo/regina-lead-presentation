@@ -73,6 +73,10 @@ class ReginaGISData:
                                                                                  unit='ms').dt.to_period('M')
         self.geo_data.crs = {'init': 'epsg:4326'}
         self.geo_data_replaced.crs = {'init': 'epsg:4326'}
+        self.geo_data['lon'] = self.geo_data.centroid.x
+        self.geo_data['lat'] = self.geo_data.centroid.y
+        self.geo_data_replaced['lon'] = self.geo_data_replaced.centroid.x
+        self.geo_data_replaced['lat'] = self.geo_data_replaced.centroid.y
 
     def get_subdivision_data(self):
         resp_subdivision = requests.get(
