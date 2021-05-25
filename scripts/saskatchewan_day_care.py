@@ -10,7 +10,15 @@ class SaskatchewanDayCare:
         temp_day_care_list = []
         page = 2
         day_care = requests.get(
-            'https://www.saskatchewan.ca/residents/family-and-social-support/child-care/find-a-child-care-provider-in-my-community?userLat=50.4791774&userLong=-104.6442839&searchRadius=50&address=Regina%2c+SK+S4R+4P8%2c+Canada&page=1')
+            'https://www.saskatchewan.ca/residents/family-and-social-support/child-care/find-a-child-care-provider-in-my-community',
+            params=dict(
+                userLat=50.4791774,
+                userLong=-104.6442839,
+                searchRadius=50,
+                address="Regina, SK S4R 4P7, Canada",
+                page=1
+            )
+        )
         soup = BeautifulSoup(day_care.content, 'html.parser')
         while len(soup.find("div", class_="map-result").find_all('li')) != 0:
             print(page, len(soup.find("div", class_="map-result").find_all('li')))
@@ -26,8 +34,15 @@ class SaskatchewanDayCare:
                     if 'REGINA' in temp_day_care_dict['complete_address'].upper():
                         temp_day_care_list.append(temp_day_care_dict)
             day_care = requests.get(
-                'https://www.saskatchewan.ca/residents/family-and-social-support/child-care/find-a-child-care-provider-in-my-community?userLat=50.4791774&userLong=-104.6442839&searchRadius=50&address=Regina%2c+SK+S4R+4P8%2c+Canada&page={}'.format(
-                    page))
+                'https://www.saskatchewan.ca/residents/family-and-social-support/child-care/find-a-child-care-provider-in-my-community',
+                params=dict(
+                    userLat=50.4791774,
+                    userLong=-104.6442839,
+                    searchRadius=50,
+                    address="Regina, SK S4R 4P7, Canada",
+                    page=page
+                )
+                )
             page += 1
         day_care_df = pd.DataFrame(temp_day_care_list)
         day_care_df['FULLADDRES'] = day_care_df.FULLADDRES.map(self.fix_address)
