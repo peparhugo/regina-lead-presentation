@@ -28,11 +28,11 @@ mapping_income_data = pd.DataFrame(
 )
 
 # get data
-stats_can_data = StatsCanData()
-stats_can_data.get_stats_can_data(mapping_income_data.GEO_UID.tolist())
-
 regina_data = ReginaGISData()
 regina_data.get_data()
+
+stats_can_data = StatsCanData()
+stats_can_data.get_stats_can_data(mapping_income_data.GEO_UID.tolist())
 
 day_care = SaskatchewanDayCare()
 day_care.get_day_cares(regina_data.addresses)
